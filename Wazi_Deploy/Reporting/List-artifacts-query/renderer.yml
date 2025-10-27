@@ -7,11 +7,14 @@
   {%- set node = result.ymli_parent %}
   {%- set member = None %}
   {%- for i in range(0,6) %}
-    {%- if node and node.name == 'MEMBER_COPY' %}
+    {%- if node and node.name == 'MEMBER_COPY' and member is none %}
       {%- set member = node %}
-      {%- break %}
     {%- endif %}
-    {%- set node = node.ymli_parent if node and node.ymli_parent else None %}
+    {%- if node and node.ymli_parent %}
+      {%- set node = node.ymli_parent %}
+    {%- else %}
+      {%- set node = None %}
+    {%- endif %}
   {%- endfor %}
 
   {%- if member and member.artifacts %}
