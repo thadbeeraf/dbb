@@ -1,70 +1,11 @@
-# Artifacts of type {{ type }} for application {{ app }} in environment {{ env }}:
-
-{%- set entries = [] %}
+# DEBUG RENDERER – list all names seen
 
 {%- for result in results %}
-  {# Walk down until we find a MEMBER_COPY node #}
   {%- set node = result.ymli_parent %}
-  {%- set member = None %}
-  {%- for i in range(0,6) %}
-    {%- if node and node.name == 'MEMBER_COPY' and member is none %}
-      {%- set member = node %}
-    {%- endif %}
-    {%- if node and node.ymli_parent %}
-      {%- set node = node.ymli_parent %}
-    {%- else %}
-      {%- set node = None %}
-    {%- endif %}
-  {%- endfor %}
-
-  {%- if member and member.artifacts %}
-    {# Now climb back up to get the manifest block (it’s a few levels deeper) #}
-    {%- set deploy = (
-      member.ymli_parent.ymli_parent.ymli_parent.ymli_parent
-      if member.ymli_parent and member.ymli_parent.ymli_parent and member.ymli_parent.ymli_parent.ymli_parent and member.ymli_parent.ymli_parent.ymli_parent.ymli_parent
-      else (
-        member.ymli_parent.ymli_parent.ymli_parent
-        if member.ymli_parent and member.ymli_parent.ymli_parent and member.ymli_parent.ymli_parent.ymli_parent
-        else member.ymli_parent
-      )
-    ) %}
-
-    {%- set manifest = deploy.manifests[0] if deploy and deploy.manifests else None %}
-    {%- set annotations = deploy.metadata.annotations if deploy and deploy.metadata and deploy.metadata.annotations else {} %}
-
-    {%- for artifact in member.artifacts %}
-      {%- set artifact_type = artifact.properties
-          | selectattr('key', 'equalto', 'type')
-          | map(attribute='value')
-          | list
-          | first %}
-      {%- if artifact_type == type %}
-        {%- set name = artifact.name ~ '.' ~ artifact_type %}
-        {%- set version = manifest.version if manifest else 'unknown-version' %}
-        {%- set app_name = manifest.name if manifest else 'unknown-app' %}
-        {%- set creation = annotations.creation_timestamp if annotations.creation_timestamp else 'unknown' %}
-        {%- set deploy_time = annotations.deploy_timestamp if annotations.deploy_timestamp else 'unknown' %}
-        {%- set key = name ~ '|' ~ version ~ '|' ~ creation ~ '|' ~ deploy_time %}
-
-        {%- if key not in entries | map(attribute='key') | list %}
-          {%- set _ = entries.append({
-            "key": key,
-            "artifact": name,
-            "app_name": app_name,
-            "version": version,
-            "creation_timestamp": creation,
-            "deploy_timestamp": deploy_time
-          }) %}
-        {%- endif %}
-      {%- endif %}
-    {%- endfor %}
-  {%- endif %}
-{%- endfor %}
-
-{# Table Header #}
-Environment          Type     Artifact               App Name                 Version                                Packaging Timestamp          Deploy Timestamp
--------------------  -------  ---------------------  -----------------------  --------------------------------------  ---------------------------  -------------------------
-
-{%- for entry in entries | sort(attribute='deploy_timestamp') %}
-{{ env.ljust(25) }}{{ type.ljust(10) }}{{ entry.artifact.ljust(23) }}{{ entry.app_name.ljust(25) }}{{ entry.version.ljust(40) }}{{ entry.creation_timestamp.ljust(27) }}{{ entry.deploy_timestamp }}
+  {%- set depth = 0 %}
+  {%- while node %}
+Name at depth {{ depth }}: {{ node.name }}
+  {%- set node = node.ymli_parent if node.ymli_parent else None %}
+  {%- set depth = depth + 1 %}
+  {%- endwhile %}
 {%- endfor %}
