@@ -1,11 +1,10 @@
-# DEBUG RENDERER – list all names seen
+# DEBUG RENDERER – listing names at different parent levels
 
 {%- for result in results %}
-  {%- set node = result.ymli_parent %}
-  {%- set depth = 0 %}
-  {%- while node %}
-Name at depth {{ depth }}: {{ node.name }}
-  {%- set node = node.ymli_parent if node.ymli_parent else None %}
-  {%- set depth = depth + 1 %}
-  {%- endwhile %}
+Result {{ loop.index }}:
+  Level 0: {{ result.name if result.name else '(none)' }}
+  Level 1: {{ result.ymli_parent.name if result.ymli_parent and result.ymli_parent.name else '(none)' }}
+  Level 2: {{ result.ymli_parent.ymli_parent.name if result.ymli_parent and result.ymli_parent.ymli_parent and result.ymli_parent.ymli_parent.name else '(none)' }}
+  Level 3: {{ result.ymli_parent.ymli_parent.ymli_parent.name if result.ymli_parent and result.ymli_parent.ymli_parent and result.ymli_parent.ymli_parent.ymli_parent and result.ymli_parent.ymli_parent.ymli_parent.name else '(none)' }}
+  Level 4: {{ result.ymli_parent.ymli_parent.ymli_parent.ymli_parent.name if result.ymli_parent and result.ymli_parent.ymli_parent and result.ymli_parent.ymli_parent.ymli_parent and result.ymli_parent.ymli_parent.ymli_parent.ymli_parent and result.ymli_parent.ymli_parent.ymli_parent.ymli_parent.name else '(none)' }}
 {%- endfor %}
